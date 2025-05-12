@@ -15,12 +15,19 @@ fn main() {
             process::exit(1);
         }
 
-        let inputs: Vec<&str> =
-            input.trim_end_matches("\n").split(" ").collect();
+        let input = input.trim();
+        let inputs: Vec<&str> = input.split(" ").collect();
         let command = inputs[0];
-        if command == "exit" {
-            process::exit(inputs[1].parse::<i32>().unwrap());
+        match command {
+            "exit" => process::exit(inputs[1].parse::<i32>().unwrap()),
+            "echo" => {
+                let mut s = String::new();
+                for arg in &inputs[1..] {
+                    s.push_str(&format!("{} ", arg));
+                }
+                println!("{}", s.trim());
+            }
+            _ => println!("{}: command not found", input.trim()),
         }
-        println!("{}: command not found", input.trim());
     }
 }
