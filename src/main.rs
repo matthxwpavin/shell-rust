@@ -5,6 +5,7 @@ use std::process;
 fn main() {
     // Uncomment this block to pass the first stage
 
+    let commands = ["exit", "echo", "type"];
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -26,6 +27,13 @@ fn main() {
                     s.push_str(&format!("{} ", arg));
                 }
                 println!("{}", s.trim());
+            }
+            "type" => {
+                if commands.contains(&inputs[1]) {
+                    println!("{} is a shell builtin", inputs[1]);
+                } else {
+                    println!("{}: not found", inputs[1]);
+                }
             }
             _ => println!("{}: command not found", input.trim()),
         }
