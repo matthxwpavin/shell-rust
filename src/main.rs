@@ -1,13 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{
-    env::{join_paths, split_paths},
-    ffi::OsString,
-    fs,
-    os::unix::ffi::OsStringExt,
-    path::{Path, PathBuf},
-    process,
-};
+use std::{env::split_paths, process};
 
 fn main() {
     // Uncomment this block to pass the first stage
@@ -37,22 +30,26 @@ fn main() {
             }
             "type" => {
                 let mut found = false;
-                if let Some(paths) = std::env::var_os("PATH") {
-                    for path in split_paths(&paths) {
-                        let path = path.join(command);
-                        if path.is_file() {
-                            println!(
-                                "{} is {}",
-                                command,
-                                path.to_str().unwrap()
-                            );
-                            found = true;
-                            break;
+                let mut bin = "";
+                if inputs.len() > 1 {
+                    bin = inputs[1];
+                    if let Some(paths) = std::env::var_os("PATH") {
+                        for path in split_paths(&paths) {
+                            let path = path.join(bin);
+                            if path.is_file() {
+                                println!(
+                                    "{} is {}",
+                                    bin,
+                                    path.to_str().unwrap()
+                                );
+                                found = true;
+                                break;
+                            }
                         }
                     }
                 }
                 if !found {
-                    println!("{}: not found", command);
+                    println!("{}: not found", bin);
                 }
             }
             _ => println!("{}: command not found", input.trim()),
