@@ -1,6 +1,13 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process;
+use std::{
+    env::{join_paths, split_paths},
+    ffi::OsString,
+    fs,
+    os::unix::ffi::OsStringExt,
+    path::{Path, PathBuf},
+    process,
+};
 
 fn main() {
     // Uncomment this block to pass the first stage
@@ -29,10 +36,23 @@ fn main() {
                 println!("{}", s.trim());
             }
             "type" => {
-                if commands.contains(&inputs[1]) {
-                    println!("{} is a shell builtin", inputs[1]);
-                } else {
-                    println!("{}: not found", inputs[1]);
+                let mut found = false;
+                if let Some(paths) = std::env::var_os("PATH") {
+                    for path in split_paths(&paths) {
+                        let path = path.join(command);
+                        if path.is_file() {
+                            println!(
+                                "{} is {}",
+                                command,
+                                path.to_str().unwrap()
+                            );
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if !found {
+                    println!("{}: not found", command);
                 }
             }
             _ => println!("{}: command not found", input.trim()),
