@@ -5,7 +5,7 @@ use std::{env::split_paths, process};
 fn main() {
     // Uncomment this block to pass the first stage
 
-    // let commands = ["exit", "echo", "type"];
+    let built_ins = ["exit", "echo", "type"];
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -29,22 +29,20 @@ fn main() {
                 println!("{}", s.trim());
             }
             "type" => {
+                let bin = if inputs.len() > 1 { inputs[1] } else { "" };
+                if built_ins.contains(&bin) {
+                    println!("{} is a shell builtin", bin);
+                    continue;
+                }
+
                 let mut found = false;
-                let mut bin = "";
-                if inputs.len() > 1 {
-                    bin = inputs[1];
-                    if let Some(paths) = std::env::var_os("PATH") {
-                        for path in split_paths(&paths) {
-                            let path = path.join(bin);
-                            if path.is_file() {
-                                println!(
-                                    "{} is {}",
-                                    bin,
-                                    path.to_str().unwrap()
-                                );
-                                found = true;
-                                break;
-                            }
+                if let Some(paths) = std::env::var_os("PATH") {
+                    for path in split_paths(&paths) {
+                        let path = path.join(bin);
+                        if path.is_file() {
+                            println!("{} is {}", bin, path.to_str().unwrap());
+                            found = true;
+                            break;
                         }
                     }
                 }
