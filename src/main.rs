@@ -5,7 +5,7 @@ use std::{env::split_paths, process};
 fn main() {
     // Uncomment this block to pass the first stage
 
-    let commands = ["exit", "echo", "type"];
+    // let commands = ["exit", "echo", "type"];
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
