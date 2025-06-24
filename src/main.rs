@@ -55,7 +55,7 @@ fn main() {
             _ => {
                 if find_command_path(command).is_some() {
                     let out = Command::new(command)
-                        .args(vec![&input[1..]])
+                        .args(&inputs[1..])
                         .output()
                         .expect("could not execute the command");
                     println!(
