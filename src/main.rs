@@ -23,15 +23,16 @@ fn main() {
         let inputs: Vec<&str> = input.split(" ").collect();
         let command = inputs[0];
 
-        let bin = if inputs.len() > 1 { inputs[1] } else { "" };
-
-        let command_path = if let Some(paths) = std::env::var_os("PATH") {
-            split_paths(&paths)
-                .map(|path| path.join(bin))
-                .find(|path| path.is_file())
-        } else {
-            None
+        let find_command_path = |command| {
+            if let Some(paths) = std::env::var_os("PATH") {
+                split_paths(&paths)
+                    .map(|path| path.join(command))
+                    .find(|path| path.is_file())
+            } else {
+                None
+            }
         };
+
         match command {
             "exit" => process::exit(inputs[1].parse::<i32>().unwrap()),
             "echo" => {
@@ -42,17 +43,17 @@ fn main() {
                 println!("{}", s.trim());
             }
             "type" => {
+                let bin = if inputs.len() > 1 { inputs[1] } else { "" };
                 if built_ins.contains(&bin) {
-                    println!("{} is a shell builtin", bin);
-                    continue;
-                } else if let Some(path) = command_path {
-                    println!("{} is {}", bin, path.to_str().unwrap());
+                    println!("{} is a shell builtin", bin)
+                } else if let Some(path) = find_command_path(bin) {
+                    println!("{} is {}", bin, path.to_str().unwrap())
                 } else {
-                    println!("{}: not found", bin);
+                    println!("{}: not found", bin)
                 }
             }
             _ => {
-                if let Some(path) = command_path {
+                if let Some(path) = find_command_path(command) {
                     let cmd = path.to_str().unwrap();
                     let out = Command::new(cmd)
                         .args(vec![&input[1..]])
