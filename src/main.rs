@@ -1,6 +1,9 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{env::split_paths, process};
+use std::{
+    env::split_paths,
+    process::{self, Command},
+};
 
 fn main() {
     // Uncomment this block to pass the first stage
@@ -19,6 +22,16 @@ fn main() {
         let input = input.trim();
         let inputs: Vec<&str> = input.split(" ").collect();
         let command = inputs[0];
+
+        let bin = if inputs.len() > 1 { inputs[1] } else { "" };
+
+        let command_path = if let Some(paths) = std::env::var_os("PATH") {
+            split_paths(&paths)
+                .map(|path| path.join(bin))
+                .find(|path| path.is_file())
+        } else {
+            None
+        };
         match command {
             "exit" => process::exit(inputs[1].parse::<i32>().unwrap()),
             "echo" => {
@@ -29,28 +42,26 @@ fn main() {
                 println!("{}", s.trim());
             }
             "type" => {
-                let bin = if inputs.len() > 1 { inputs[1] } else { "" };
                 if built_ins.contains(&bin) {
                     println!("{} is a shell builtin", bin);
                     continue;
-                }
-
-                let mut found = false;
-                if let Some(paths) = std::env::var_os("PATH") {
-                    for path in split_paths(&paths) {
-                        let path = path.join(bin);
-                        if path.is_file() {
-                            println!("{} is {}", bin, path.to_str().unwrap());
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if !found {
+                } else if let Some(path) = command_path {
+                    println!("{} is {}", bin, path.to_str().unwrap());
+                } else {
                     println!("{}: not found", bin);
                 }
             }
-            _ => println!("{}: command not found", input.trim()),
+            _ => {
+                if let Some(path) = command_path {
+                    let cmd = path.to_str().unwrap();
+                    Command::new(cmd)
+                        .args(vec![&input[1..]])
+                        .output()
+                        .expect("could not execute the command");
+                } else {
+                    println!("{}: command not found", input.trim());
+                }
+            }
         }
     }
 }
