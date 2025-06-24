@@ -53,9 +53,8 @@ fn main() {
                 }
             }
             _ => {
-                if let Some(path) = find_command_path(command) {
-                    let cmd = path.to_str().unwrap();
-                    let out = Command::new(cmd)
+                if find_command_path(command).is_some() {
+                    let out = Command::new(command)
                         .args(vec![&input[1..]])
                         .output()
                         .expect("could not execute the command");
