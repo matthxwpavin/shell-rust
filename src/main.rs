@@ -58,7 +58,7 @@ fn main() {
                         .args(&inputs[1..])
                         .output()
                         .expect("could not execute the command");
-                    println!(
+                    print!(
                         "{}",
                         String::from_utf8(out.stdout)
                             .expect("could not get output")
