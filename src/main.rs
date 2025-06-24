@@ -54,12 +54,17 @@ fn main() {
             _ => {
                 if let Some(path) = command_path {
                     let cmd = path.to_str().unwrap();
-                    Command::new(cmd)
+                    let out = Command::new(cmd)
                         .args(vec![&input[1..]])
                         .output()
                         .expect("could not execute the command");
+                    println!(
+                        "{}",
+                        String::from_utf8(out.stdout)
+                            .expect("could not get output")
+                    )
                 } else {
-                    println!("{}: command not found", input.trim());
+                    println!("{}: command not found", input.trim())
                 }
             }
         }
